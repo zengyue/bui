@@ -39,6 +39,17 @@
         </div>
       </div>
 
+      <div class="row">
+        <div class="span8">
+          <div id="comboxRow"></div>
+        </div>
+        <div class="span8">
+          <div id="comboxSrc">
+            <input type="text">
+          </div>
+        </div>
+      </div>
+
       <div id="upload">
         <input type="file">
       </div>
@@ -62,6 +73,7 @@
     <script type="text/javascript" src="../src/form/field/radio.js"></script>
     <script type="text/javascript" src="../src/form/field/plain.js"></script>
     <script type="text/javascript" src="../src/form/field/list.js"></script>
+    <script type="text/javascript" src="../src/form/field/combox.js"></script>
     <script type="text/javascript" src="../src/form/field/uploader.js"></script>
     <script type="text/javascript" src="../src/form/field/checklist.js"></script>
     <script type="text/javascript" src="../src/form/field/radiolist.js"></script>

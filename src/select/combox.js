@@ -52,8 +52,17 @@ define('bui/select/combox',['bui/common','bui/select/select'],function (require)
         }
       }
       combox.superclass._uiSetItems.call(_self,v);
+    },
+    bindUI: function(){
+      var _self = this,
+        el = _self.get('el'),
+        inputCls = _self.get('inputCls'),
+        inputEl = el.find('.' + inputCls);
+      inputEl.on('change', function(ev){
+         _self.fire('change', {text: inputEl.val()});
+        //_self.setSelectedValue(inputEl.val());
+      })
     }
-
   },{
     ATTRS : 
     /**

@@ -783,6 +783,37 @@ BUI.use('bui/form/checkboxfield',function(CheckBox){
 });
 /**/
 
+//combox
+BUI.use('bui/form/comboxfield',function(Combox){
+  describe('测试JS创建列表字段',function(){
+    var field = new Combox({
+      render : '#comboxRow',
+      label : 'combox列表',
+      elCls : 'control-group span8',
+      items : {'1' : '1','2':'2'},
+      list : {
+        elCls : 'bui-select-list'
+      },
+      value : '2'
+    });
+    field.render();
+  });
+
+  describe('测试srcNode创建列表字段',function(){
+    var field = new Combox({
+      srcNode : '#comboxSrc',
+      label : 'combox列表',
+      elCls : 'control-group span8',
+      items : {'1' : '1','2':'2'},
+      list : {
+        elCls : 'bui-select-list'
+      },
+      value : '2'
+    });
+    field.render();
+  });
+});
+
 /**上传组件**/
 BUI.use('bui/form/uploaderfield',function(UploaderField){
   var field = new UploaderField({

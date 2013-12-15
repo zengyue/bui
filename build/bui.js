@@ -19106,6 +19106,179 @@ define('bui/form/listfield',['bui/common','bui/form/basefield','bui/list'],funct
 
   return List;
 });/**
+ * @fileOverview \u8868\u5355\u4e2d\u7684\u4e0b\u62c9\u9009\u62e9\u5217\u8868
+ * @ignore
+ */
+
+define('bui/form/comboxfield',['bui/common','bui/form/basefield','bui/list'],function (require) {
+  var BUI = require('bui/common'),
+    Field = require('bui/form/basefield');
+
+
+  function formatItems(items){
+    if($.isPlainObject(items)){
+      var tmp = [];
+      BUI.each(items, function(v,n){
+        tmp.push({value : n,text : v});
+      });
+      return tmp;
+    }
+    var rst = [];
+    BUI.each(items,function(item,index){
+      if(BUI.isString(item)){
+        rst.push({value : item,text:item});
+      }else{
+        rst.push(item);
+      }
+    });
+    return rst;
+  }
+
+  function filterItem(items, filter){
+    var rst = [];
+    BUI.each(items, function(item){
+      if(filter && item.text.indexOf(filter) === -1){
+        return;
+      }
+      rst.push(item);
+    })
+    return rst;
+  }
+
+
+  /**
+   * @class BUI.Form.Field.Combox
+   * \u8868\u5355\u4e2d\u7684\u5217\u8868
+   * @extends BUI.Form.Field
+   */
+  var Combox = Field.extend({
+    renderUI: function(){
+      var _self = this;
+      _self._initPicker();
+    },
+    /**
+     * \u521d\u59cb\u5316\u9009\u62e9\u5668
+     */
+    _initPicker: function(){
+      var _self = this,
+        innerControl = _self.getInnerControl();
+      BUI.use('bui/picker', function(Picker){
+        var picker = new Picker.ListPicker({
+          trigger: innerControl,
+          autoSetValue: false,
+          children: [{
+            elCls:'bui-select-list',
+            items: formatItems(_self.get('items'))
+          }],
+          valueField: innerControl
+        }).render();
+        picker.get('el').css('min-width', innerControl.outerWidth());
+        _self.set('picker', picker);
+      })
+    },
+    bindUI: function(){
+      var _self = this,
+        innerControl = _self.getInnerControl(),
+        items = _self.get('items');
+
+      if(_self.get('inputFilter')){
+        innerControl.on('keyup', function(ev){
+          var picker = _self.get('picker'),
+            list = picker.get('list');
+          picker.show();
+          list.set('items', filterItem(formatItems(items), innerControl.val()));
+        })
+      }
+    }
+  },{
+    ATTRS : {
+      /**
+       * \u9009\u62e9\u5668
+       * @type {BUI.Picker.ListPicker}
+       */
+      picker: {
+      },
+      /**
+       * \u8f93\u5165\u65f6\u662f\u5426\u81ea\u52a8\u8fc7\u6ee4
+       * @type {Object}
+       */
+      inputFilter: {
+        value: true
+      }
+    }
+  },{
+    xclass : 'form-field-combox'
+  });
+
+  // var Combox = Field.extend({
+  //   renderUI: function(){
+  //     var _self = this,
+  //       combox = _self.get('combox') || {},
+  //       innerControl = _self.getInnerControl();
+  //     _self._initCombox(combox);
+  //   },
+  //   /**
+  //    * \u521d\u59cb\u5316combox
+  //    * @param  {[type]} combox [description]
+  //    * @return {[type]}        [description]
+  //    */
+  //   _initCombox: function(combox){
+  //     var _self = this,
+  //       items = _self.get('items');
+
+  //     BUI.use('bui/select', function(Select){
+  //       combox.render = _self.getControlContainer();
+  //       combox.valueField = _self.getInnerControl();
+  //       combox.autoRender = true;
+  //       if(items){
+  //         combox.items = items;
+  //       }
+  //       combox = new Select.Combox(combox);
+  //       _self.set('combox', combox);
+  //       _self.set('isCreate',true);
+  //       _self.get('children').push(combox);
+
+  //       combox.on('change',function(ev){
+  //         var val = combox.getSelectedValue();
+  //         _self.set('value',val);
+  //       });
+  //     })
+  //   },
+  //   /**
+  //    * \u8bbe\u7f6e\u5b57\u6bb5\u7684\u503c
+  //    * @protected
+  //    * @param {*} value \u5b57\u6bb5\u503c
+  //    */
+  //   setControlValue : function(value){
+  //     var _self = this,
+  //       combox = _self.get('combox'),
+  //       innerControl = _self.getInnerControl();
+  //     innerControl.val(value);
+  //     if(combox && combox.set &&  combox.getSelectedValue() !== value){
+  //       select.setSelectedValue(combox);
+  //     }
+  //   }
+  // },{
+  //   ATTRS : {
+  //     /**
+  //      * \u9009\u62e9\u5668
+  //      * @type {BUI.Picker.ListPicker}
+  //      */
+  //     picker: {
+  //     },
+  //     controlTpl: {
+  //       value : '<input type="hidden"/>'
+  //     },
+  //     combox: {
+
+  //     }
+  //   }
+  // },{
+  //   xclass : 'form-field-combox'
+  // });
+
+  return Combox;
+});/**
  * @fileOverview \u6a21\u62df\u9009\u62e9\u6846\u5728\u8868\u5355\u4e2d
  * @ignore
  */
@@ -19276,6 +19449,7 @@ define(BASE + 'field',['bui/common',BASE + 'textfield',BASE + 'datefield',BASE +
     Checkbox : require(BASE + 'checkboxfield'),
     Plain : require(BASE + 'plainfield'),
     List : require(BASE + 'listfield'),
+    Combox : require(BASE + 'comboxfield'),
     Uploader : require(BASE + 'uploaderfield'),
     CheckList : require(BASE + 'checklistfield'),
     RadioList : require(BASE + 'radiolistfield')
@@ -22489,8 +22663,17 @@ define('bui/select/combox',['bui/common','bui/select/select'],function (require)
         }
       }
       combox.superclass._uiSetItems.call(_self,v);
+    },
+    bindUI: function(){
+      var _self = this,
+        el = _self.get('el'),
+        inputCls = _self.get('inputCls'),
+        inputEl = el.find('.' + inputCls);
+      inputEl.on('change', function(ev){
+         _self.fire('change', {text: inputEl.val()});
+        //_self.setSelectedValue(inputEl.val());
+      })
     }
-
   },{
     ATTRS : 
     /**

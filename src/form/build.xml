@@ -34,6 +34,7 @@
 			<path path="field/radio.js"/>
 			<path path="field/plain.js"/>
             <path path="field/list.js"/>
+            <path path="field/combox.js"/>
 			<path path="field/uploader.js"/>
 			<path path="field/checklist.js"/>
 			<path path="field/radiolist.js"/>
