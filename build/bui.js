@@ -19135,14 +19135,16 @@ define('bui/form/comboxfield',['bui/common','bui/form/basefield','bui/list'],fun
   }
 
   function filterItem(items, filter){
-    var rst = [];
-    BUI.each(items, function(item){
-      if(filter && item.text.indexOf(filter) === -1){
-        return;
-      }
-      rst.push(item);
-    })
-    return rst;
+    if(filter){
+      var rst = [];
+      BUI.each(items, function(item){
+        if(item.text.indexOf(filter) !== -1){
+          rst.push(item);
+        }
+      })
+      return rst;
+    }
+    return items;
   }
 
 
@@ -19163,31 +19165,75 @@ define('bui/form/comboxfield',['bui/common','bui/form/basefield','bui/list'],fun
       var _self = this,
         innerControl = _self.getInnerControl();
       BUI.use('bui/picker', function(Picker){
-        var picker = new Picker.ListPicker({
+        var items = formatItems(_self.get('items')),
+          picker = new Picker.ListPicker({
           trigger: innerControl,
           autoSetValue: false,
           children: [{
             elCls:'bui-select-list',
-            items: formatItems(_self.get('items'))
+            items: items
           }],
           valueField: innerControl
         }).render();
-        picker.get('el').css('min-width', innerControl.outerWidth());
+        // picker.get('el').css('min-width', innerControl.outerWidth());
         _self.set('picker', picker);
+        _self.set('items', items);
+        //\u7ed1\u5b9apicker\u7684\u4e8b\u4ef6
+        _self._initPickerEvent();
+
+        _self._initMinWidth();
+        _self._initMaxHeight();
       })
     },
-    bindUI: function(){
+    /**
+     * \u521d\u59cb\u5316picker\u7684\u4e8b\u4ef6
+     */
+    _initPickerEvent: function(){
       var _self = this,
         innerControl = _self.getInnerControl(),
-        items = _self.get('items');
+        items = _self.get('items'),
+        picker = _self.get('picker'),
+        list = picker.get('list');
 
-      if(_self.get('inputFilter')){
-        innerControl.on('keyup', function(ev){
-          var picker = _self.get('picker'),
-            list = picker.get('list');
-          picker.show();
-          list.set('items', filterItem(formatItems(items), innerControl.val()));
-        })
+      //\u5728picker\u7684show\u65f6\u548c\u8f93\u5165\u6846\u503c\u7684\u6539\u53d8\u65f6\uff0c\u90fd\u9700\u8981\u91cd\u65b0\u83b7\u53d6\u91cc\u9762\u7684item\u9879
+      picker.on('show', function(ev){
+        list.set('items', filterItem(items, innerControl.val()));
+      });
+      innerControl.on('keyup', function(ev){
+        list.set('items', filterItem(items, innerControl.val()));
+        picker.show();
+      });
+    },
+    /**
+     * \u521d\u59cb\u5316Picker\u7684\u5bbd\u5ea6
+     * @private
+     */
+    _initMinWidth: function(){
+      var _self = this,
+        minWidth = _self.get('minWidth') || _self.getInnerControl().outerWidth(),
+        picker = _self.get('picker');
+      _self.set('minWidth', minWidth);
+    },
+    /**
+     * \u521d\u59cb\u5316picker\u7684\u6700\u5927\u9ad8\u5ea6
+     * @private
+     */
+    _initMaxHeight: function(){
+      var maxHeight = this.get('maxHeight');
+      if(maxHeight){
+        this.set('maxHeight', maxHeight);
+      }
+    },
+    _uiSetMinWidth: function(v){
+      var picker = this.get('picker');
+      if(picker && picker.isController){
+        picker.get('el').css('min-width', v);
+      }
+    },
+    _uiSetMaxHeight: function(v){
+      var picker = this.get('picker');
+      if(picker && picker.isController){
+        picker.get('el').css('max-height', v);
       }
     }
   },{
@@ -19204,6 +19250,20 @@ define('bui/form/comboxfield',['bui/common','bui/form/basefield','bui/list'],fun
        */
       inputFilter: {
         value: true
+      },
+      /**
+       * picker\u7684\u6700\u5c0f\u5bbd\u5ea6
+       * @type {Object}
+       */
+      minWidth:{
+        view: true
+      },
+      /**
+       * picker\u7684\u6700\u9ad8\u9ad8\u5ea6
+       * @type {Number}
+       */
+      maxHeight: {
+        view: true
       }
     }
   },{
