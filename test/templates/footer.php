@@ -10,7 +10,6 @@
         },200);
       });
 
-      </script> 
     </script>
   </body>
 </html>
