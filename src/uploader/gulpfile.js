@@ -1,20 +1,17 @@
 'use strict';
 
 var gulp = require('gulp');
-var clean = require('gulp-clean');
 var concat = require('gulp-concat');
-var rename = require('gulp-rename');
-var uglify = require('gulp-uglify');
 var less = require('gulp-less');
 var minifyCSS = require('gulp-minify-css');
-var n2a = require('gulp-native2ascii');
-var chug = require( 'gulp-chug' );
 
-// gulp.task('prepare', function() {
-//   gulp.src('./build/uploader.js')
-//     .pipe(clean());
-// });
-
+gulp.task('copy', function(){
+  console.log(111);
+  gulp.src([
+      './plugins/ajbridge/uploader.swf'
+    ])
+    .pipe(gulp.dest('../../build/uploader'))
+});
 
 //合并js 
 gulp.task('uploader.js', function(){
@@ -41,5 +38,5 @@ gulp.task('uploader.js', function(){
 
 // 默认任务
 gulp.task('default', function() {
-  gulp.start('uploader.js');
+  gulp.start('copy', 'uploader.js');
 });

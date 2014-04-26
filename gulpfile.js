@@ -8,18 +8,23 @@ var uglify = require('gulp-uglify');
 var less = require('gulp-less');
 var minifyCSS = require('gulp-minify-css');
 var n2a = require('gulp-native2ascii');
-var chug = require( 'gulp-chug' );
 var through = require('through2');
 var spawn = require('child_process').spawn;
 
 
 //执行子任务
-function subTask() {
+function subTask(isAnt) {
   // Creating a stream through which each file will pass
   var stream = through.obj(function(file, enc, callback) {
     //src 必须使用{read: false}
     if (file.isNull()) {
-      var task = spawn('gulp', ['--gulpfile', file.path]);
+      var task;
+      if(isAnt){
+        task = spawn('ant', ['-f', file.path, 'build']);
+      }
+      else{
+        task = spawn('gulp', ['--gulpfile', file.path]);
+      }
       task.stdout.on('data', function (data) {
         console.log('stdout: ' + data);
       });
@@ -28,10 +33,11 @@ function subTask() {
       });
       task.on('close', function (code) {
         console.log('child process exited with code ' + code);
+        callback();
       });
     }
 
-    return callback();
+    //return callback();
   });
 
   // returning the file stream
@@ -41,7 +47,7 @@ function subTask() {
 var desDir = './build';
 
 
-
+//清理build目录
 gulp.task('prepare', function() {
   return gulp.src(desDir, {read: false})
     .pipe(clean());
@@ -49,13 +55,26 @@ gulp.task('prepare', function() {
 
 //
 gulp.task('copy', function() {
-  return gulp.src(['src/common/adapter.js', 'src/extensions/**/*.js'])
+  gulp.src(['src/common/adapter.js'])
     .pipe(gulp.dest(desDir));
+  gulp.src(['src/extensions/**/*.js'])
+    .pipe(gulp.dest(desDir + '/extensions'));
 });
 
 
-//子任务
-gulp.task('chug', function () {
+// ant的子任务
+gulp.task('ant', function(){
+  return gulp.src([
+      './**/build.xml',
+      //除去根目录下的gulpfile.js
+      '!./build.xml'
+    ], {read: false})
+    .pipe(subTask(true));
+})
+
+
+// gulpfile的子任务
+gulp.task('sub',['ant'], function () {
   return gulp.src([
       './**/gulpfile.js',
       //除去根目录下的gulpfile.js
@@ -63,12 +82,12 @@ gulp.task('chug', function () {
       //除去node_modules目录下的gulpfile.js
       '!./node_modules/**/gulpfile.js'
     ], {read: false})
-    .pipe(subTask())
+    .pipe(subTask());
 });
 
 
 //合并js 
-gulp.task('seed.js', ['chug'], function(){
+gulp.task('seed.js', ['sub'], function(){
   return gulp.src([
       desDir + '/loader.js',
       desDir + '/common.js',
@@ -77,7 +96,9 @@ gulp.task('seed.js', ['chug'], function(){
     ]).pipe(concat('seed.js'))
     .pipe(gulp.dest(desDir));
 });
-gulp.task('bui.js', ['chug'], function(){
+
+//合并bui.js
+gulp.task('bui.js', ['sub'], function(){
   return gulp.src([
       desDir + '/loader.js',
       desDir + '/common.js',
@@ -121,15 +142,32 @@ gulp.task('compress.js', ['seed.js', 'bui.js'], function(){
 });
 
 
-gulp.task('minify-css', function() {
-  gulp.src(desDir + '/**/*.css')
-    .pipe(minifyCSS())
-    .pipe(rename({suffix: '-min'}))
-    .pipe(gulp.dest(desDir));
+gulp.task('minify-css', ['sub'], function() {
+  // gulp.src([
+  //     //build目录下面所有的css文件
+  //     desDir + '/**/*.css',
+  //     //非-min文件
+  //     '!' + desDir + '/**/*-min.css',
+  //   ])
+  //   .pipe(minifyCSS())
+  //   .pipe(rename({suffix: '-min'}))
+  //   .pipe(gulp.dest(desDir));
+  
+  //拷贝assets目录下面的css文件
+  gulp.src([
+      './assets/css/**/*.css'
+    ])
+    .pipe(gulp.dest(desDir + '/css'));
+  //拷贝assets目录下面的图片文件
+  gulp.src([
+      './assets/img/**/*.*'
+    ])
+    .pipe(gulp.dest(desDir + '/img'));
+
 });
 
 // 默认任务
-gulp.task('default', function() {
-  // gulp.start('copy', 'compress.js', 'minify-css');
-  gulp.start('chug');
+gulp.task('default', ['prepare'], function() {
+  gulp.start('copy', 'compress.js', 'minify-css');
+  // gulp.start('sub');
 });
