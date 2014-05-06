@@ -18890,6 +18890,7 @@ define('bui/form/selectfield',['bui/common','bui/form/basefield'],function (requ
   function resetOptions (select,options,self) {
     select.children().remove();
     var emptyText = self.get('emptyText');
+
     if(emptyText && self.get('showBlank')){
       appendItem('',emptyText,select);
     }
@@ -18899,8 +18900,11 @@ define('bui/form/selectfield',['bui/common','bui/form/basefield'],function (requ
   }
 
   function appendItem(value,text,select){
-     var str = '<option value="' + value +'">'+text+'</option>'
-    $(str).appendTo(select);
+    // var str = '<option value="' + value +'">'+text+'</option>'
+    // $(str).appendTo(select);
+    var option = new Option(text, value),
+      options = select[0].options;
+    options[options.length] = option;
   }
   /**
    * \u8868\u5355\u9009\u62e9\u57df
