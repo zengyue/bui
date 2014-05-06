@@ -15,14 +15,23 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      './src/**/*.js',
-      './test/specs/**/*.js'
+      'src/jquery-1.8.1.min.js',
+      'build/**/*.js',
+      'test/specs/**/*.js',
+      //加载文件，但是不直接引用到浏览器里
+      {pattern: 'test/data/*.*', included: false}
     ],
+
+    //单元测试里面的data请求
+    proxies: {
+      '/data/': '/base/test/data/'
+    },
 
 
     // list of files to exclude
     exclude: [
-      
+      'build/**/*-min.js',
+      'build/adapter.js'
     ],
 
 
