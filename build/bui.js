@@ -4940,13 +4940,15 @@ define('bui/component/uibase/align',['bui/ua'],function (require) {
         },
         __bindUI : function(){
             var _self = this;
+
+            var fn = BUI.wrapBehavior(_self,'handleWindowResize');
             
             _self.on('show',function(){
-                $(window).on('resize',BUI.wrapBehavior(_self,'handleWindowResize'));
+                $(window).on('resize',fn);
             });
 
             _self.on('hide',function(){
-                $(window).off('resize',BUI.getWrapBehavior(_self,'handleWindowResize'));
+                $(window).off('resize',fn);
             });
         },
         //\u5904\u7406window resize\u4e8b\u4ef6
@@ -23621,6 +23623,11 @@ define('bui/select/combox',['bui/common','bui/select/select'],function (require)
           list.clearItemStatus(item);
         }
       });
+
+      picker.on('show',function(){
+        list.clearSelected();
+      });
+
     },
     //\u8986\u5199\u6b64\u65b9\u6cd5
     _uiSetValueField : function(){
@@ -34865,7 +34872,7 @@ define('bui/grid/plugins/editing',function (require) {
         var field = _self.getFieldConfig(column);
         if(field){
           field.name = column.get('dataIndex');
-          field.id = column.get('id');
+          //field.id = column.get('id');
           if(field.validator){
             field.validator = _self.wrapValidator(field.validator);
           }
